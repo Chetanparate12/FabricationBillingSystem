@@ -13,18 +13,12 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_key")
 
-# Authentication removed
-
-# Never remove the database to ensure bill persistence
-sqlite_path = "instance/bills.db"
-# Always preserve the database - removed the code that deletes it
-
-# Use a persistent database path for deployment
-if os.environ.get("REPLIT_DEPLOYMENT") == "1":
-    # In deployment, use a fixed path for persistence
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////home/runner/appdata/bills.db"
-    # Create the directory if it doesn't exist
-    os.makedirs("/home/runner/appdata", exist_ok=True)
+# Update database configuration for Render
+if os.environ.get("RENDER_DEPLOYMENT") == "1":
+    # In Render deployment, use the specified database path
+    db_path = os.path.join(os.environ.get("RENDER_DATA_DIR", ""), "bills.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///bills.db")
 

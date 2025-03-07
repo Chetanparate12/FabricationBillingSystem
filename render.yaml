@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fabrication-billing-system
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn_config.py main:app
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: RENDER_DEPLOYMENT
+        value: 1
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
