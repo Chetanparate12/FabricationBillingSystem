@@ -23,9 +23,13 @@ else:
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///bills.db")
 
 # Restore data from Replit DB if SQLite is empty
+# Remove or modify the restore_from_replit_db function
 def restore_from_replit_db():
+    # Skip Replit DB restoration on Render
+    if os.environ.get("RENDER_DEPLOYMENT") == "1":
+        return
+    
     try:
-        from models import Bill
         from replit import db
         import json
         from datetime import datetime
@@ -57,7 +61,7 @@ def restore_from_replit_db():
                 print(f"Error restoring from Replit DB: {str(e)}")
                 # Continue without Replit DB if there's an error
     except ImportError:
-        print("Replit DB module not available")
+        print("Replit DB module not available - skipping restoration")
         # Continue without Replit DB if it's not available
     except Exception as e:
         print(f"Error in restore_from_replit_db: {str(e)}")

@@ -23,51 +23,11 @@ def index():
 @app.route('/bills')
 def bills():
     try:
-        # Try to get bills from SQLite first
-        all_bills = Bill.query.order_by(Bill.date.desc()).all()
-        
-        # If no bills in SQLite, try getting from Replit DB
-        if len(all_bills) == 0:
-            from utils.db_backup import get_all_bills_from_replit_db
-            replit_bills = get_all_bills_from_replit_db()
-            
-            # If we have bills in Replit DB, convert them to Bill objects for display
-            if replit_bills:
-                for bill_data in replit_bills:
-                    new_bill = Bill(
-                        bill_number=bill_data['bill_number'],
-                        client_name=bill_data['client_name'],
-                        phone_number=bill_data['phone_number'],
-                        date=bill_data['date'],
-                        items=bill_data['items'],
-                        subtotal=bill_data['subtotal'],
-                        total=bill_data['total'],
-                        pdf_path=bill_data['pdf_path'],
-                        amount_paid=bill_data['amount_paid'],
-                        payment_status=bill_data['payment_status']
-                    )
-                    db.session.add(new_bill)
-                try:
-                    db.session.commit()
-                    # Fetch the bills again after restoration
-                    all_bills = Bill.query.order_by(Bill.date.desc()).all()
-                    app.logger.info(f"Restored {len(replit_bills)} bills from Replit DB to SQLite")
-                    flash('Bills have been restored from backup and are now permanently saved.', 'success')
-                except Exception as e:
-                    db.session.rollback()
-                    app.logger.error(f"Error restoring bills from Replit DB: {str(e)}")
-        
-        # Add environment variable to ensure database is always preserved
-        if os.environ.get("PRESERVE_DB") != "1":
-            os.environ["PRESERVE_DB"] = "1"
-            
-        return render_template('bills.html', bills=all_bills, permanent_storage=True)
+        bills = Bill.query.all()
+        return render_template('bills.html', bills=bills)
     except Exception as e:
         app.logger.error(f"Error in bills route: {str(e)}")
-        # If all else fails, get bills directly from Replit DB for display
-        from utils.db_backup import get_all_bills_from_replit_db
-        replit_bills = get_all_bills_from_replit_db()
-        return render_template('bills.html', bills=replit_bills)
+        return render_template('bills.html', bills=[])
 
 @app.route('/generate_bill', methods=['POST'])
 def generate_bill():

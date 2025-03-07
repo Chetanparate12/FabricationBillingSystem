@@ -39,25 +39,27 @@ def backup_bill_to_replit_db(bill):
         return False
 
 def get_all_bills_from_replit_db():
-    """Get all bills from Replit DB"""
     try:
-        bill_keys = [k for k in db.keys() if k.startswith('bill_')]
-        bills_data = []
-        
-        for key in bill_keys:
-            bill_data = db.get(key)
-            if bill_data:
-                # Convert date string back to datetime
-                if 'date' in bill_data and isinstance(bill_data['date'], str):
-                    bill_data['date'] = datetime.fromisoformat(bill_data['date'])
-                bills_data.append(bill_data)
-                
-        # Sort by date, newest first
-        bills_data.sort(key=lambda x: x['date'], reverse=True)
-        return bills_data
-    except Exception as e:
-        print(f"Error retrieving bills from Replit DB: {str(e)}")
-        return []
+        from replit import db
+        """Get all bills from Replit DB"""
+        try:
+            bill_keys = [k for k in db.keys() if k.startswith('bill_')]
+            bills_data = []
+            
+            for key in bill_keys:
+                bill_data = db.get(key)
+                if bill_data:
+                    # Convert date string back to datetime
+                    if 'date' in bill_data and isinstance(bill_data['date'], str):
+                        bill_data['date'] = datetime.fromisoformat(bill_data['date'])
+                    bills_data.append(bill_data)
+                    
+            # Sort by date, newest first
+            bills_data.sort(key=lambda x: x['date'], reverse=True)
+            return bills_data
+        except Exception as e:
+            print(f"Error retrieving bills from Replit DB: {str(e)}")
+            return []
 
 def delete_bill_from_replit_db(bill_number):
     """Delete a bill from Replit DB"""
